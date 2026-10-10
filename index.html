@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Braquage · Il y a une Taupe parmi vous</title>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800;900&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0f2f6b;--bg2:#143a80;--ink:#eaf2ff;--mute:#9db6e3;--acc:#ffb02e;--hot:#ff5a5a;--line:#2e5bb0;--grid:rgba(255,255,255,.07);--btx:#0f2f6b;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#f2f5fb;--bg2:#fff;--ink:#0f2f6b;--mute:#5a6f9a;--acc:#d9620b;--hot:#d62839;--line:#c3d1ea;--grid:rgba(15,47,107,.07);--btx:#fff}}
+:root[data-theme="light"]{--bg:#f2f5fb;--bg2:#fff;--ink:#0f2f6b;--mute:#5a6f9a;--acc:#d9620b;--hot:#d62839;--line:#c3d1ea;--grid:rgba(15,47,107,.07);--btx:#fff}
+:root[data-theme="dark"]{--bg:#0f2f6b;--bg2:#143a80;--ink:#eaf2ff;--mute:#9db6e3;--acc:#ffb02e;--hot:#ff5a5a;--line:#2e5bb0;--grid:rgba(255,255,255,.07);--btx:#0f2f6b}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 'Special Elite','Courier New',monospace;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px}
+.wrap{max-width:520px;margin:0 auto;padding:18px 16px 48px;min-height:100%}
+h1,h2,h3{font-family:'Big Shoulders Display',Impact,'Arial Narrow',sans-serif;font-weight:900;text-transform:uppercase;margin:0;line-height:.95}
+h1{font-size:84px;text-shadow:4px 4px 0 var(--acc)}
+h2{font-size:34px}h3{font-size:24px}
+p{margin:8px 0}
+small{color:var(--mute);font-size:13px}
+.card{background:var(--bg2);border:2px solid var(--line);border-radius:4px;padding:16px;margin:14px 0;position:relative}
+.card.dos{border-left:8px solid var(--acc)}
+.stamp{display:inline-block;border:3px double var(--hot);color:var(--hot);padding:2px 12px;font:900 18px 'Big Shoulders Display',Impact,sans-serif;letter-spacing:2px;text-transform:uppercase;transform:rotate(-3deg)}
+.btn{display:block;width:100%;padding:14px;border:0;border-radius:6px;background:var(--acc);color:var(--btx);font:900 24px 'Big Shoulders Display',Impact,sans-serif;text-transform:uppercase;letter-spacing:1px;cursor:pointer;margin:12px 0;box-shadow:0 4px 0 rgba(0,0,0,.35)}
+.btn:active{transform:translateY(3px);box-shadow:none}
+.btn:focus-visible,.pl:focus-visible,input:focus-visible,.pw:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.btn.hot{background:var(--hot);color:#fff}
+.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line);box-shadow:none}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+input{width:100%;padding:12px;background:var(--bg2);border:2px solid var(--line);color:var(--ink);border-radius:4px;font:inherit}
+.row{display:flex;align-items:center;gap:10px}.sp{justify-content:space-between}
+.pips{display:flex;gap:6px;margin-top:4px}
+.pip{width:30px;height:12px;border:2px solid var(--line);border-radius:2px;display:block}
+.pip.on{background:var(--acc);border-color:var(--acc)}
+.pip.al.on{background:var(--hot);border-color:var(--hot)}
+.pl{display:flex;align-items:center;gap:10px;padding:10px;border:2px solid var(--line);border-radius:4px;margin:8px 0;background:var(--bg2);cursor:pointer;width:100%;color:inherit;font:inherit;text-align:left}
+.pl.sel{border-color:var(--acc);box-shadow:0 0 0 2px var(--acc) inset}
+.av{font-size:26px;width:44px;height:44px;flex:none;display:grid;place-items:center;border-radius:50%;background:var(--bg);border:2px solid var(--line)}
+.pw{margin-left:auto;font:inherit;font-size:13px;border:2px dashed var(--acc);color:var(--acc);background:none;border-radius:4px;padding:6px 8px;cursor:pointer}
+.pw.u{opacity:.35;text-decoration:line-through}
+.hold{position:relative;user-select:none;-webkit-user-select:none;touch-action:none;-webkit-touch-callout:none;overflow:hidden;border-radius:4px;margin:16px 0}
+.hold .card{margin:0;min-height:250px}
+.hold .cv{position:absolute;inset:0;background:repeating-linear-gradient(-45deg,var(--ink) 0 14px,var(--bg) 14px 28px);display:grid;place-items:center;transition:opacity .12s}
+.hold .cv span{background:var(--bg);color:var(--acc);padding:10px 16px;border:3px solid var(--acc);font:900 26px 'Big Shoulders Display',Impact,sans-serif;text-transform:uppercase;text-align:center}
+.hold.open .cv{opacity:0}
+.role{margin-top:12px;padding:10px;border:2px dashed var(--acc)}
+.role.t{border-color:var(--hot);color:var(--hot)}
+.fc{width:62px;height:82px;display:grid;place-items:center;font-size:30px;border-radius:4px;background:var(--bg2);border:3px solid var(--acc);animation:pop .5s both}
+.fc.S{border-color:var(--hot)}
+.vd{font:900 56px/1 'Big Shoulders Display',Impact,sans-serif;text-transform:uppercase;text-align:center;margin:10px 0;animation:fade .5s both}
+.vd.bad{color:var(--hot)}.vd.good{color:var(--acc)}
+.late{animation:fade .5s both}
+@keyframes pop{from{opacity:0;transform:rotateY(90deg) scale(.6)}to{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.shake{animation:shake .3s}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;animation-delay:0s!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app" class="wrap"></div>
+<script type="module">
+import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import {getAuth,GoogleAuthProvider,signInWithPopup,onAuthStateChanged,signOut} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import {getFirestore,doc,onSnapshot} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+// 1) Colle ici la config de ton application web Firebase (Paramètres du projet > Général)
+
+const firebaseConfig={apiKey:'AIzaSyDRqx5GMw1g8an71GCvB_RHeGA8thB5GaQ',authDomain:'braquage-game.firebaseapp.com',projectId:'braquage-game',appId:'1:738859576855:web:311f347f81eb1c7535f652'};
+const fb=initializeApp(firebaseConfig),auth=getAuth(fb),fs=getFirestore(fb);
+const app=document.getElementById('app');
+const SP=[
+{k:'hack',e:'🖥️',n:'Hacker',p:'Piratage',d:'Efface 1 alerte.'},
+{k:'brain',e:'🧠',n:'Cerveau',p:'Plan B',d:'Remplace l\'obstacle par un autre.'},
+{k:'muscle',e:'💪',n:'Costaud',p:'Force brute',d:'Cet obstacle est réussi, même en cas de sabotage.'},
+{k:'drive',e:'🏎️',n:'Conducteur',p:'Raccourci',d:'Franchit l\'obstacle sans le jouer.'},
+{k:'charm',e:'🎭',n:'Charmeur',p:'Interrogatoire',d:'Pose une question piège à un joueur au hasard.'},
+{k:'pyro',e:'🧨',n:'Pyro',p:'Diversion',d:'L\'équipe d\'action compte un joueur de moins.'}];
+const SPm=Object.fromEntries(SP.map(s=>[s.k,s]));
+const OB=[
+{n:'Caméras du hall',e:'📹',t:'Cent yeux de verre scrutent le marbre.',h:'hack'},
+{n:'Garde insomniaque',e:'💂',t:'Il fait sa ronde en sifflotant. Il ne dort jamais.',h:'charm'},
+{n:'Porte blindée',e:'🚪',t:'Quarante tonnes d\'acier. Pas de poignée.',h:'muscle'},
+{n:'Réseau laser',e:'🔴',t:'Une toile rouge. Un faux pas et tout sonne.',h:'brain'},
+{n:'Coffre à combinaison',e:'🔐',t:'Six chiffres, trois essais, zéro droit à l\'erreur.',h:'brain'},
+{n:'Chien de garde',e:'🐕',t:'Il a flairé quelqu\'un. Peut-être l\'un de vous.',h:'charm'},
+{n:'Ascenseur piégé',e:'🛗',t:'Le câble grince. Il faut faire diversion.',h:'pyro'},
+{n:'Fuite sur le toit',e:'🚁',t:'La police arrive et votre taxi est en retard.',h:'drive'}];
+const QS=['Où étais-tu hier soir à 22h ?','Quel est le dernier objet que tu as volé ?','Décris ton plan sans dire « euh ».','Qui ici ferait le meilleur traître, et pourquoi pas toi ?','Quel mensonge as-tu dit aujourd\'hui ?','Si tu devais trahir quelqu\'un, ce serait qui ?'];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const tsz=s=>Math.max(1,(s.p.length>=6?3:2)-(s.flag&&s.flag.minus?1:0));
+let user=null,me='',V=null,SEC=null,unsubs=[],ready=false;
+let L={name:'',code:'',err:'',busy:false,pw:false,acc:false,warn:'',last:'',scr:'home'};
+const mine=()=>{const p=V&&V.p.find(p=>p.id==me);return p&&{...p,taupe:!!(SEC&&SEC.taupe)}};
+
+async function send(a){
+if(!user)return null;
+try{
+const r=await fetch('/api/act',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+await user.getIdToken()},body:JSON.stringify({...a,code:a.t=='create'?'':L.code})});
+const j=await r.json().catch(()=>({}));
+if(!r.ok){L.err=j.error||'Erreur serveur.';L.busy=false;render();return null}
+return j}catch(e){L.err='Connexion perdue. Réessaie.';L.busy=false;render();return null}}
+
+function upd(){const j=JSON.stringify([V,SEC]);if(j!==L.last){L.last=j;render()}}
+function watch(code){
+unsubs.forEach(f=>f());unsubs=[];V=null;SEC=null;L.code=code;L.scr='game';L.last='';L.err='';
+try{localStorage.setItem('braq-room',code)}catch(e){}
+unsubs.push(onSnapshot(doc(fs,'rooms',code),s=>{if(s.exists()){V=s.data();upd()}else leave()},()=>leave()));
+unsubs.push(onSnapshot(doc(fs,'rooms',code,'secrets',me),s=>{SEC=s.exists()?s.data():null;upd()},()=>{}));
+render()}
+function leave(){unsubs.forEach(f=>f());unsubs=[];V=null;SEC=null;L.scr='home';L.last='';
+try{localStorage.removeItem('braq-room')}catch(e){}
+render()}
+
+async function create(){L.err='';L.busy=true;render();const j=await send({t:'create'});L.busy=false;if(j&&j.code)watch(j.code)}
+async function joinG(){const c=L.code.trim().toUpperCase();
+if(c.length!=4){L.err='Entre le code à 4 lettres.';return render()}
+L.code=c;L.err='';L.busy=true;render();const j=await send({t:'join'});L.busy=false;if(j&&j.ok)watch(c)}
+async function login(){try{await signInWithPopup(auth,new GoogleAuthProvider())}catch(e){L.err='Connexion Google annulée ou refusée.';render()}}
+function logout(){signOut(auth)}
+
+onAuthStateChanged(auth,u=>{
+ready=true;user=u;me=u?u.uid:'';
+if(!u){unsubs.forEach(f=>f());unsubs=[];V=null;SEC=null;L.scr='home';return render()}
+L.err='';
+let c='';try{c=localStorage.getItem('braq-room')||''}catch(e){}
+if(c)watch(c);else render()});
+
+function lobby(){const h=V.host==me;return `<div class="stamp">Salle ${V.code}</div>
+<p style="margin-top:16px"><small>Envoie ce code à tes amis</small><br><b style="color:var(--acc);font:900 64px/1 'Big Shoulders Display',Impact,sans-serif;letter-spacing:8px">${V.code}</b></p>
+<h3 style="margin:14px 0 6px">Équipe ${V.p.length}/8</h3>
+${V.p.map(p=>`<div class="pl"><div class="av">🕶️</div><b>${esc(p.name)}</b>${p.id==V.host?'<small style="margin-left:auto">hôte</small>':''}</div>`).join('')}
+${h?`<button class="btn" ${V.p.length>=4?'':'disabled'} onclick="send({t:'start'})">Distribuer les dossiers</button><small>Il faut 4 joueurs minimum.</small>`:"<p><small>En attente de l'hôte…</small></p>"}`}
+
+function reveal(){const m=mine(),sp=SPm[m.sp],rd=V.ready.includes(me);
+return `<div class="stamp">Ton dossier</div>
+<h2 style="margin:16px 0 6px">${esc(m.name)}, lis ça en secret</h2>
+<p><small>Maintiens la carte pour lire ton dossier.</small></p>
+<div class="hold" oncontextmenu="return false" onpointerdown="this.classList.add('open')" onpointerup="this.classList.remove('open')" onpointerleave="this.classList.remove('open')" onpointercancel="this.classList.remove('open')">
+<div class="card dos"><div style="font-size:54px">${sp.e}</div><h3 style="font-size:36px">${sp.n}</h3><p>⚡ <b>${sp.p}</b> : ${sp.d}</p>
+<div class="role ${m.taupe?'t':''}">${m.taupe?'🐀 Tu es la TAUPE. Sabote en silence sans te faire griller.':'✅ Tu es loyal. Démasque la Taupe.'}</div></div>
+<div class="cv"><span>Maintenir pour lire 🔒</span></div></div>
+${rd?`<p><small>En attente des autres (${V.ready.length}/${V.p.length})…</small></p>`:`<button class="btn" onclick="send({t:'ready'})">J'ai mémorisé</button>`}`}
+
+function brief(){const o=OB[V.ob],ts=tsz(V),h=V.host==me,m=mine();
+const pips=(n,c)=>Array.from({length:3},(_,i)=>`<i class="pip ${c} ${i<n?'on':''}"></i>`).join('');
+let pwp='';if(L.pw&&!m.used){const sp=SPm[m.sp];pwp=`<div class="card" style="border-color:var(--acc)">Utiliser <b>${sp.p}</b> ?<br><small>${sp.d}</small><div class="row"><button class="btn" onclick="L.pw=false;send({t:'pw'})">Activer</button><button class="btn ghost" onclick="L.pw=false;render()">Annuler</button></div></div>`}
+let ap='';if(h&&L.acc)ap=V.acc>0?`<div class="card" style="border-color:var(--hot)"><h3>Qui est la Taupe ?</h3><small>Mauvaise cible : +1 alerte.</small>${V.p.map(p=>`<button class="pl" onclick="L.acc=false;send({t:'acc',who:'${p.id}'})"><div class="av">🕶️</div><b>${esc(p.name)}</b></button>`).join('')}</div>`:`<div class="card"><small>Plus aucune accusation.</small></div>`;
+return `<div class="row sp"><div><small>Butin</small><div class="pips">${pips(V.succ,'')}</div></div><div class="stamp">Obstacle ${V.round}</div><div><small>Alerte</small><div class="pips">${pips(V.alert,'al')}</div></div></div>
+${m.taupe?'<p><small>🐀 Tu es la Taupe.</small></p>':''}
+${V.msg?`<div class="card" style="border-color:var(--acc)">${esc(V.msg)}</div>`:''}
+<div class="card dos"><div style="font-size:56px">${o.e}</div><h2>${o.n}</h2><p>${o.t}</p><small>Spécialité utile : ${SPm[o.h].e} ${SPm[o.h].n}</small></div>
+<h3>Équipe d'action <span style="color:var(--acc)">${V.sel.length}/${ts}</span></h3>
+<small>${h?'Débattez à voix haute, puis touche les joueurs choisis.':"L'hôte compose l'équipe après votre débat."}</small>
+${V.p.map(p=>{const sp=SPm[p.sp],own=p.id==me;return `<div class="pl ${V.sel.includes(p.id)?'sel':''}" ${h?`tabindex="0" onclick="send({t:'tog',who:'${p.id}'})"`:''}><div class="av">${sp.e}</div><div><b>${esc(p.name)}${own?' (toi)':''}</b><br><small>${sp.n}</small></div>${own&&!p.used?`<button class="pw" onclick="event.stopPropagation();L.pw=true;render()">⚡ ${sp.p}</button>`:`<span class="pw ${p.used?'u':''}" style="border-color:transparent">⚡ ${sp.p}</span>`}</div>`}).join('')}
+${pwp}
+${h?`<button class="btn" ${V.sel.length==ts?'':'disabled'} onclick="send({t:'go'})">Lancer l'opération</button><button class="btn ghost" onclick="L.acc=!L.acc;render()">🔦 Accuser un suspect (${V.acc})</button>${ap}`:''}`}
+
+function play(){const o=OB[V.ob],inSel=V.sel.includes(me),done=V.voted.includes(me);
+const names=V.sel.map(i=>esc(V.p.find(p=>p.id==i).name)).join(', ');
+if(inSel&&!done)return `<h2>${o.e} ${o.n}</h2><p><small>Ton choix reste secret : il sera mélangé avec les autres.</small></p>
+<button class="btn" onclick="voteC('A')">✅ Assister l'équipe</button>
+<button class="btn hot" onclick="voteC('S')">💣 Saboter</button>
+${L.warn?`<div class="card shake" style="border-color:var(--hot)">${L.warn}</div>`:''}`;
+return `<h2>${o.e} ${o.n}</h2><div class="card dos"><p>${inSel?'Vote envoyé.':"Tu n'es pas dans l'équipe d'action."}</p><p><small>Équipe : ${names}<br>Votes reçus : ${V.voted.length}/${V.sel.length}</small></p></div>`}
+function voteC(c){if(c=='S'&&!mine().taupe){L.warn='Un vrai braqueur ne trahit pas. Touche « Assister » pour valider.';return render()}L.warn='';send({t:'vote',c})}
+
+function result(){const r=V.res,d=r.v.length*.7,o=OB[V.ob],h=V.host==me;
+return `<div class="stamp">Résultat</div><h2 style="margin:16px 0">${o.e} ${o.n}</h2>
+<div class="row" style="flex-wrap:wrap;justify-content:center;margin:24px 0">${r.v.map((c,i)=>`<div class="fc ${c}" style="animation-delay:${i*.7}s">${c=='S'?'💣':'✅'}</div>`).join('')}</div>
+<div class="vd ${r.fail?'bad':'good'}" style="animation-delay:${d}s">${r.fail?'Sabotage !':'Franchi !'}</div>
+${r.neut?`<p class="late" style="text-align:center;animation-delay:${d}s">💪 La Force brute a neutralisé un sabotage.</p>`:''}
+${h?`<button class="btn late" style="animation-delay:${d+.4}s" onclick="send({t:'next'})">Continuer</button>`:`<p class="late" style="text-align:center;animation-delay:${d+.4}s"><small>L'hôte continue la partie…</small></p>`}`}
+
+function end(){const t=V.p.find(p=>p.id==V.taupe),ok=V.w=='crew',h=V.host==me;
+return `<div class="stamp">${ok?'Mission accomplie':'Mission échouée'}</div>
+<h1 style="font-size:68px;margin:16px 0">${ok?'Butin<br>sécurisé':'Tout est<br>perdu'}</h1>
+<div class="card dos"><div style="font-size:50px">🐀</div><h3>La Taupe était ${esc(t.name)}</h3><small>${SPm[t.sp].e} ${SPm[t.sp].n}</small>
+<p>${ok?"Grillée ! L'équipe empoche le butin.":"Elle a mené tout le monde en bateau."}</p></div>
+<div class="card"><h3>L'équipe</h3>${V.p.map(p=>`<div class="row" style="margin:8px 0"><div class="av">${SPm[p.sp].e}</div><span>${esc(p.name)}</span><small style="margin-left:auto">${p.id==V.taupe?'🐀 Taupe':SPm[p.sp].n}</small></div>`).join('')}</div>
+${h?`<button class="btn" onclick="send({t:'again'})">Rejouer avec la même équipe</button>`:`<p><small>L'hôte peut relancer une partie.</small></p>`}`}
+
+const rules=`<div class="card dos"><h3>Le plan</h3>
+<p>Chacun reçoit en secret une spécialité et un pouvoir. L'un de vous est la Taupe 🐀.</p>
+<p>À chaque obstacle, vous débattez, l'hôte compose l'équipe, et chaque membre choisit en secret : assister ou saboter.</p>
+<p>Trois obstacles franchis, c'est le butin. Trois alertes, c'est la prison.</p></div>`;
+
+function loginScr(){return `<div class="stamp">Top secret</div>
+<h1 style="margin-top:16px">Bra<br>quage</h1>
+<p>Un coffre. Une équipe. <b style="color:var(--hot)">Une Taupe</b> parmi vous. Chacun joue sur son propre écran, où que vous soyez. Lancez un appel vocal à côté pour débattre.</p>
+${L.err?`<div class="card" style="border-color:var(--hot)">${esc(L.err)}</div>`:''}
+${ready?`<button class="btn" onclick="login()">Se connecter avec Google</button>`:'<p><small>Chargement…</small></p>'}
+${rules}`}
+
+function home(){return `<div class="row sp"><span class="stamp">Top secret</span><button class="pw" onclick="logout()">Déconnexion</button></div>
+<h1 style="margin-top:16px">Bra<br>quage</h1>
+<p>Salut <b>${esc((user.displayName||'').split(' ')[0])}</b>. Crée une partie, ou entre le code d'un ami.</p>
+${L.err?`<div class="card" style="border-color:var(--hot)">${esc(L.err)}</div>`:''}
+<button class="btn" ${L.busy?'disabled':''} onclick="create()">Créer une partie</button>
+<div class="row"><input aria-label="Code de la partie" maxlength="4" placeholder="Code à 4 lettres" value="${esc(L.code)}" oninput="L.code=this.value.toUpperCase()" style="text-transform:uppercase"><button class="btn ghost" ${L.busy?'disabled':''} style="width:auto;margin:0;padding:12px 18px" onclick="joinG()">Rejoindre</button></div>
+${rules}`}
+
+function render(){let h;
+if(!user)h=loginScr();
+else if(L.scr=='home')h=home();
+else if(!V)h=`<div class="stamp">Connexion</div><p>Recherche de la salle ${esc(L.code)}…</p><button class="btn ghost" onclick="leave()">Annuler</button>`;
+else if(V.ph!='lobby'&&!mine())h=`<div class="stamp">Partie en cours</div><p>Les dossiers sont déjà distribués. Attends la prochaine partie.</p><button class="btn ghost" onclick="leave()">Retour</button>`;
+else h=({lobby,reveal,brief,play,result,end}[V.ph])();
+app.innerHTML=h}
+
+Object.assign(window,{L,send,create,joinG,login,logout,leave,voteC,render});
+render();
+</script>
+</body>
+</html>
