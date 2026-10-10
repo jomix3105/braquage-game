@@ -63,10 +63,9 @@ input{width:100%;padding:12px;background:var(--bg2);border:2px solid var(--line)
 <script type="module">
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import {getAuth,GoogleAuthProvider,signInWithPopup,onAuthStateChanged,signOut} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import {getFirestore,doc,onSnapshot} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import {getFirestore,doc,onSnapshot,collection,query,orderBy,limit} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 // 1) Colle ici la config de ton application web Firebase (Paramètres du projet > Général)
-
-const firebaseConfig={apiKey:'AIzaSyDRqx5GMw1g8an71GCvB_RHeGA8thB5GaQ',authDomain:'braquage-game.firebaseapp.com',projectId:'braquage-game',appId:'1:738859576855:web:311f347f81eb1c7535f652'};
+const firebaseConfig={apiKey:'À_REMPLIR',authDomain:'À_REMPLIR',projectId:'À_REMPLIR',appId:'À_REMPLIR'};
 const fb=initializeApp(firebaseConfig),auth=getAuth(fb),fs=getFirestore(fb);
 const app=document.getElementById('app');
 const SP=[
@@ -88,8 +87,8 @@ const OB=[
 {n:'Fuite sur le toit',e:'🚁',t:'La police arrive et votre taxi est en retard.',h:'drive'}];
 const QS=['Où étais-tu hier soir à 22h ?','Quel est le dernier objet que tu as volé ?','Décris ton plan sans dire « euh ».','Qui ici ferait le meilleur traître, et pourquoi pas toi ?','Quel mensonge as-tu dit aujourd\'hui ?','Si tu devais trahir quelqu\'un, ce serait qui ?'];
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const tsz=s=>Math.max(1,(s.p.length>=6?3:2)-(s.flag&&s.flag.minus?1:0));
-let user=null,me='',V=null,SEC=null,unsubs=[],ready=false;
+const tsz=s=>Math.max(2,Math.floor(s.p.length/2)+1-(s.flag&&s.flag.minus?1:0));
+let user=null,me='',V=null,SEC=null,unsubs=[],ready=false,LB=[],lbUn=null;
 let L={name:'',code:'',err:'',busy:false,pw:false,acc:false,warn:'',last:'',scr:'home'};
 const mine=()=>{const p=V&&V.p.find(p=>p.id==me);return p&&{...p,taupe:!!(SEC&&SEC.taupe)}};
 
@@ -121,6 +120,8 @@ function logout(){signOut(auth)}
 
 onAuthStateChanged(auth,u=>{
 ready=true;user=u;me=u?u.uid:'';
+if(lbUn){lbUn();lbUn=null}
+if(u)lbUn=onSnapshot(query(collection(fs,'lb'),orderBy('pts','desc'),limit(10)),s=>{LB=s.docs.map(d=>({id:d.id,...d.data()}));if(!V||V.ph=='end')render()},()=>{});
 if(!u){unsubs.forEach(f=>f());unsubs=[];V=null;SEC=null;L.scr='home';return render()}
 L.err='';
 let c='';try{c=localStorage.getItem('braq-room')||''}catch(e){}
@@ -138,7 +139,7 @@ return `<div class="stamp">Ton dossier</div>
 <p><small>Maintiens la carte pour lire ton dossier.</small></p>
 <div class="hold" oncontextmenu="return false" onpointerdown="this.classList.add('open')" onpointerup="this.classList.remove('open')" onpointerleave="this.classList.remove('open')" onpointercancel="this.classList.remove('open')">
 <div class="card dos"><div style="font-size:54px">${sp.e}</div><h3 style="font-size:36px">${sp.n}</h3><p>⚡ <b>${sp.p}</b> : ${sp.d}</p>
-<div class="role ${m.taupe?'t':''}">${m.taupe?'🐀 Tu es la TAUPE. Sabote en silence sans te faire griller.':'✅ Tu es loyal. Démasque la Taupe.'}</div></div>
+<div class="role ${m.taupe?'t':''}">${m.taupe?'🐀 Tu es la TAUPE. Sabote en silence sans te faire griller. Une fois par partie, tu peux faire un sabotage double (+2 alertes).':'✅ Tu es loyal. Démasque la Taupe.'}</div></div>
 <div class="cv"><span>Maintenir pour lire 🔒</span></div></div>
 ${rd?`<p><small>En attente des autres (${V.ready.length}/${V.p.length})…</small></p>`:`<button class="btn" onclick="send({t:'ready'})">J'ai mémorisé</button>`}`}
 
@@ -149,7 +150,7 @@ let ap='';if(h&&L.acc)ap=V.acc>0?`<div class="card" style="border-color:var(--ho
 return `<div class="row sp"><div><small>Butin</small><div class="pips">${pips(V.succ,'')}</div></div><div class="stamp">Obstacle ${V.round}</div><div><small>Alerte</small><div class="pips">${pips(V.alert,'al')}</div></div></div>
 ${m.taupe?'<p><small>🐀 Tu es la Taupe.</small></p>':''}
 ${V.msg?`<div class="card" style="border-color:var(--acc)">${esc(V.msg)}</div>`:''}
-<div class="card dos"><div style="font-size:56px">${o.e}</div><h2>${o.n}</h2><p>${o.t}</p><small>Spécialité utile : ${SPm[o.h].e} ${SPm[o.h].n}</small></div>
+<div class="card dos"><div style="font-size:56px">${o.e}</div><h2>${o.n}</h2><p>${o.t}</p><small>Spécialiste : ${SPm[o.h].e} ${SPm[o.h].n}. Dans l'équipe, il réduit de 1 le coût d'un sabotage.</small></div>
 <h3>Équipe d'action <span style="color:var(--acc)">${V.sel.length}/${ts}</span></h3>
 <small>${h?'Débattez à voix haute, puis touche les joueurs choisis.':"L'hôte compose l'équipe après votre débat."}</small>
 ${V.p.map(p=>{const sp=SPm[p.sp],own=p.id==me;return `<div class="pl ${V.sel.includes(p.id)?'sel':''}" ${h?`tabindex="0" onclick="send({t:'tog',who:'${p.id}'})"`:''}><div class="av">${sp.e}</div><div><b>${esc(p.name)}${own?' (toi)':''}</b><br><small>${sp.n}</small></div>${own&&!p.used?`<button class="pw" onclick="event.stopPropagation();L.pw=true;render()">⚡ ${sp.p}</button>`:`<span class="pw ${p.used?'u':''}" style="border-color:transparent">⚡ ${sp.p}</span>`}</div>`}).join('')}
@@ -161,14 +162,16 @@ const names=V.sel.map(i=>esc(V.p.find(p=>p.id==i).name)).join(', ');
 if(inSel&&!done)return `<h2>${o.e} ${o.n}</h2><p><small>Ton choix reste secret : il sera mélangé avec les autres.</small></p>
 <button class="btn" onclick="voteC('A')">✅ Assister l'équipe</button>
 <button class="btn hot" onclick="voteC('S')">💣 Saboter</button>
+${mine().taupe&&!(SEC&&SEC.dbl)?`<button class="btn hot" onclick="voteC('D')">💣💣 Sabotage double (1 fois)</button>`:''}
 ${L.warn?`<div class="card shake" style="border-color:var(--hot)">${L.warn}</div>`:''}`;
 return `<h2>${o.e} ${o.n}</h2><div class="card dos"><p>${inSel?'Vote envoyé.':"Tu n'es pas dans l'équipe d'action."}</p><p><small>Équipe : ${names}<br>Votes reçus : ${V.voted.length}/${V.sel.length}</small></p></div>`}
-function voteC(c){if(c=='S'&&!mine().taupe){L.warn='Un vrai braqueur ne trahit pas. Touche « Assister » pour valider.';return render()}L.warn='';send({t:'vote',c})}
+function voteC(c){if(c!='A'&&!mine().taupe){L.warn='Un vrai braqueur ne trahit pas. Touche « Assister » pour valider.';return render()}L.warn='';send({t:'vote',c})}
 
 function result(){const r=V.res,d=r.v.length*.7,o=OB[V.ob],h=V.host==me;
 return `<div class="stamp">Résultat</div><h2 style="margin:16px 0">${o.e} ${o.n}</h2>
 <div class="row" style="flex-wrap:wrap;justify-content:center;margin:24px 0">${r.v.map((c,i)=>`<div class="fc ${c}" style="animation-delay:${i*.7}s">${c=='S'?'💣':'✅'}</div>`).join('')}</div>
 <div class="vd ${r.fail?'bad':'good'}" style="animation-delay:${d}s">${r.fail?'Sabotage !':'Franchi !'}</div>
+${r.fail?`<p class="late" style="text-align:center;animation-delay:${d}s">${r.dmg?'+'+r.dmg+' alerte'+(r.dmg>1?'s':''):'Aucune alerte'}${r.sp?' · 🎯 le spécialiste a limité les dégâts':''}</p>`:''}
 ${r.neut?`<p class="late" style="text-align:center;animation-delay:${d}s">💪 La Force brute a neutralisé un sabotage.</p>`:''}
 ${h?`<button class="btn late" style="animation-delay:${d+.4}s" onclick="send({t:'next'})">Continuer</button>`:`<p class="late" style="text-align:center;animation-delay:${d+.4}s"><small>L'hôte continue la partie…</small></p>`}`}
 
@@ -177,13 +180,17 @@ return `<div class="stamp">${ok?'Mission accomplie':'Mission échouée'}</div>
 <h1 style="font-size:68px;margin:16px 0">${ok?'Butin<br>sécurisé':'Tout est<br>perdu'}</h1>
 <div class="card dos"><div style="font-size:50px">🐀</div><h3>La Taupe était ${esc(t.name)}</h3><small>${SPm[t.sp].e} ${SPm[t.sp].n}</small>
 <p>${ok?"Grillée ! L'équipe empoche le butin.":"Elle a mené tout le monde en bateau."}</p></div>
-<div class="card"><h3>L'équipe</h3>${V.p.map(p=>`<div class="row" style="margin:8px 0"><div class="av">${SPm[p.sp].e}</div><span>${esc(p.name)}</span><small style="margin-left:auto">${p.id==V.taupe?'🐀 Taupe':SPm[p.sp].n}</small></div>`).join('')}</div>
+<div class="card"><h3>L'équipe</h3>${V.p.map(p=>`<div class="row" style="margin:8px 0"><div class="av">${SPm[p.sp].e}</div><span>${esc(p.name)}</span><small style="margin-left:auto">${p.id==V.taupe?'🐀 Taupe':SPm[p.sp].n} · +${(V.pts||{})[p.id]||0} pts</small></div>`).join('')}</div>
+${lbCard()}
 ${h?`<button class="btn" onclick="send({t:'again'})">Rejouer avec la même équipe</button>`:`<p><small>L'hôte peut relancer une partie.</small></p>`}`}
 
 const rules=`<div class="card dos"><h3>Le plan</h3>
 <p>Chacun reçoit en secret une spécialité et un pouvoir. L'un de vous est la Taupe 🐀.</p>
 <p>À chaque obstacle, vous débattez, l'hôte compose l'équipe, et chaque membre choisit en secret : assister ou saboter.</p>
-<p>Trois obstacles franchis, c'est le butin. Trois alertes, c'est la prison.</p></div>`;
+<p>Trois obstacles franchis, c'est le butin. Trois alertes, c'est la prison. Six obstacles maximum.</p>
+<p>Points : les loyaux gagnent 3 pts s'ils l'emportent (1 sinon), la Taupe 5 pts si elle gagne.</p></div>`;
+
+const lbCard=()=>`<div class="card dos"><h3>Classement</h3>${LB.length?LB.map((p,k)=>`<div class="row" style="margin:6px 0"><b style="width:30px">${['🥇','🥈','🥉'][k]||k+1}</b><span>${esc(p.name||'?')}${p.id==me?' (toi)':''}</span><small style="margin-left:auto">${p.pts||0} pts · ${p.wins||0} vict. / ${p.games||0}</small></div>`).join(''):'<small>Aucune partie jouée pour l\'instant.</small>'}</div>`;
 
 function loginScr(){return `<div class="stamp">Top secret</div>
 <h1 style="margin-top:16px">Bra<br>quage</h1>
@@ -198,6 +205,7 @@ function home(){return `<div class="row sp"><span class="stamp">Top secret</span
 ${L.err?`<div class="card" style="border-color:var(--hot)">${esc(L.err)}</div>`:''}
 <button class="btn" ${L.busy?'disabled':''} onclick="create()">Créer une partie</button>
 <div class="row"><input aria-label="Code de la partie" maxlength="4" placeholder="Code à 4 lettres" value="${esc(L.code)}" oninput="L.code=this.value.toUpperCase()" style="text-transform:uppercase"><button class="btn ghost" ${L.busy?'disabled':''} style="width:auto;margin:0;padding:12px 18px" onclick="joinG()">Rejoindre</button></div>
+${lbCard()}
 ${rules}`}
 
 function render(){let h;
