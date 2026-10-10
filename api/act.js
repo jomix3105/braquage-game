@@ -7,24 +7,26 @@ try { db.settings({ ignoreUndefinedProperties: true }); } catch (e) {}
 
 const SPK = ['hack', 'brain', 'muscle', 'drive', 'charm', 'pyro'];
 const NOB = 8;
+const OBH = ['hack', 'charm', 'muscle', 'brain', 'brain', 'charm', 'pyro', 'drive'];
 const QS = ['Où étais-tu hier soir à 22h ?', 'Quel est le dernier objet que tu as volé ?', 'Décris ton plan sans dire « euh ».', 'Qui ici ferait le meilleur traître, et pourquoi pas toi ?', 'Quel mensonge as-tu dit aujourd\'hui ?', 'Si tu devais trahir quelqu\'un, ce serait qui ?'];
 const sh = a => { a = [...a]; for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const pick = a => a[Math.random() * a.length | 0];
 const oids = () => Array.from({ length: NOB }, (_, i) => i);
-const tsz = s => Math.max(1, (s.p.length >= 6 ? 3 : 2) - (s.flag && s.flag.minus ? 1 : 0));
+const tsz = s => Math.max(2, Math.floor(s.p.length / 2) + 1 - (s.flag && s.flag.minus ? 1 : 0));
 const nextOb = X => (X.pool.length ? X.pool : (X.pool = sh(oids()))).pop();
 
 function deal(H, X, sec) {
   const sp = sh(SPK), t = Math.random() * H.p.length | 0;
   H.p.forEach((p, i) => { p.sp = sp[i % 6]; p.used = false; sec[p.id] = { taupe: i == t }; });
-  X.taupe = H.p[t].id; X.pool = sh(oids()); X.votes = {};
+  X.taupe = H.p[t].id; X.pool = sh(oids()); X.votes = {}; X.dbl = 0;
   Object.assign(H, { succ: 0, alert: 0, acc: 2, round: 1, flag: {}, sel: [], msg: '', ready: [], res: null, w: '', taupe: '', ph: 'reveal' });
   H.ob = nextOb(X);
 }
-function finish(H, X, ok, note) {
-  if (ok) H.succ++; else H.alert++;
+function finish(H, X, ok, note, dmg) {
+  if (ok) H.succ++; else H.alert += (dmg == null ? 1 : dmg);
   H.msg = note || ''; X.votes = {}; H.sel = []; H.flag = {};
   if (H.succ >= 3 || H.alert >= 3) { H.w = H.succ >= 3 ? 'crew' : 'taupe'; H.taupe = X.taupe; H.ph = 'end'; return; }
+  if (H.round >= 6) { H.w = 'taupe'; H.taupe = X.taupe; H.ph = 'end'; return; }
   H.round++; H.ob = nextOb(X); H.ph = 'brief';
 }
 function usePw(H, X, p) {
@@ -60,13 +62,18 @@ function handle(H, X, sec, a, id, name) {
     else if (a.t == 'acc' && boss) accuse(H, X, a.who);
   }
   else if (H.ph == 'play' && a.t == 'vote' && H.sel.includes(id) && !(id in X.votes)) {
-    X.votes[id] = (a.c == 'S' && X.taupe == id) ? 'S' : 'A';
+    const tp = X.taupe == id; let c = 'A';
+    if (tp && a.c == 'D' && !X.dbl) { X.dbl = 1; c = 'D'; sec[id] = { taupe: true, dbl: true }; }
+    else if (tp && a.c != 'A') c = 'S';
+    X.votes[id] = c;
     if (Object.keys(X.votes).length >= H.sel.length) {
-      const v = sh(Object.values(X.votes)), s = v.includes('S');
-      H.res = { v, fail: s && !H.flag.sure, neut: s && !!H.flag.sure }; H.ph = 'result';
+      const v = Object.values(X.votes), s = v.some(x => x != 'A'), d = v.includes('D') ? 2 : 1;
+      const spc = H.p.some(x => H.sel.includes(x.id) && x.sp == OBH[H.ob]);
+      H.res = { v: sh(v.map(x => x == 'D' ? 'S' : x)), fail: s && !H.flag.sure, neut: s && !!H.flag.sure, dmg: s ? Math.max(0, d - (spc ? 1 : 0)) : 0, sp: s && spc };
+      H.ph = 'result';
     }
   }
-  else if (H.ph == 'result' && a.t == 'next' && boss) finish(H, X, !H.res.fail, H.res.fail ? '💥 Sabotage ! +1 alerte.' : '✅ Obstacle franchi, bien joué.');
+  else if (H.ph == 'result' && a.t == 'next' && boss) finish(H, X, !H.res.fail, H.res.fail ? (H.res.dmg ? '💥 Sabotage ! +' + H.res.dmg + ' alerte' + (H.res.dmg > 1 ? 's' : '') + '.' : '💥 Sabotage, mais le spécialiste a limité la casse : aucune alerte.') : '✅ Obstacle franchi, bien joué.', H.res.dmg);
   else if (H.ph == 'end' && a.t == 'again' && boss) deal(H, X, sec);
   H.voted = Object.keys(X.votes || {});
 }
@@ -96,7 +103,17 @@ module.exports = async (req, res) => {
         H = rs.data(); X = ps.exists ? ps.data() : { pool: [], votes: {}, taupe: '' };
       }
       const sec = {};
+      const wasEnd = H.ph == 'end';
       handle(H, X, sec, a, u.uid, name);
+      if (!wasEnd && H.ph == 'end') {
+        H.pts = {};
+        const inc = admin.firestore.FieldValue.increment;
+        H.p.forEach(p => {
+          const t = p.id == X.taupe, n = t ? (H.w == 'taupe' ? 5 : 0) : (H.w == 'crew' ? 3 : 1);
+          H.pts[p.id] = n;
+          tx.set(db.collection('lb').doc(p.id), { name: p.name, pts: inc(n), games: inc(1), wins: inc(n >= 3 ? 1 : 0) }, { merge: true });
+        });
+      }
       tx.set(ref, H); tx.set(pr, X);
       for (const id in sec) tx.set(ref.collection('secrets').doc(id), sec[id]);
     });
